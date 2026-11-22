@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#000000" />
+    <title>Fieldwork</title>
+    <link rel="icon" href="/dk3d/mark.svg" type="image/svg+xml" />
+    <script type="module" crossorigin src="/dk3d/assets/index-BOs_wE5n.js"></script>
+    <link rel="stylesheet" crossorigin href="/dk3d/assets/index-1Y1Jhvkq.css">
+  </head>
+  <body>
+    <main id="home-screen" aria-labelledby="home-heading">
+      <div class="home-content">
+        <h1 id="home-heading" tabindex="-1">Pick one</h1>
+        <ul id="lesson-list" class="lesson-list"></ul>
+      </div>
+    </main>
+    <template id="lesson-card">
+      <li class="lesson-card">
+        <a class="lesson-play">
+          <div class="lesson-art"><img alt="" /></div>
+          <div class="lesson-caption">
+            <div>
+              <span class="lesson-kind"></span>
+              <h2 class="lesson-name"></h2>
+            </div>
+            <span class="lesson-action">Play <i data-icon="right"></i></span>
+          </div>
+        </a>
+        <a class="lesson-settings">
+          <i data-icon="layers"></i> Layers &amp; sound
+        </a>
+      </li>
+    </template>
+
+    <main id="viewport" aria-label="Blue racer word game" hidden>
+      <div id="stage"></div>
+      <img
+        class="poster"
+        id="poster"
+        alt="Illustrated blue racer snake"
+      />
+      <canvas id="fx" aria-hidden="true"></canvas>
+      <div id="annotations">
+        <svg class="leader" aria-hidden="true"></svg>
+      </div>
+      <div id="word-effects" aria-hidden="true"></div>
+      <div id="finale" hidden>
+        <h2>You did it!</h2>
+        <div class="finale-buttons">
+          <button id="play-again" type="button">Play again</button>
+          <button id="pick-animal" type="button">Pick an animal</button>
+        </div>
+      </div>
+      <section id="word-game" aria-label="Word labels" hidden>
+        <div class="word-deck">
+          <span class="word-card word-back" aria-hidden="true"></span>
+          <span class="word-card word-back" aria-hidden="true"></span>
+          <button
+            class="word-card word-front"
+            type="button"
+            aria-describedby="word-status"
+          ></button>
+        </div>
+        <p id="word-status" class="visually-hidden" role="status"></p>
+      </section>
+      <button id="next-layer" type="button" hidden>
+        Next <i data-icon="right"></i>
+      </button>
+      <div class="word-card word-drag" aria-hidden="true" hidden></div>
+      <div id="focus-badge" hidden>
+        <span></span
+        ><button aria-label="Return to complete view">
+          <i data-icon="close"></i>
+        </button>
+      </div>
+      <button
+        class="viewport-button"
+        id="go-home"
+        type="button"
+        aria-label="Home"
+        title="Home"
+      >
+        <i data-icon="home"></i>
+      </button>
+      <button
+        class="viewport-button"
+        id="open-explorer"
+        type="button"
+        aria-label="Layers"
+        aria-controls="layer-hud"
+        aria-expanded="false"
+        title="Layers"
+      >
+        <i data-icon="layers"></i>
+      </button>
+      <div id="loading" role="status"></div>
+    </main>
+
+    <dialog id="layer-hud" aria-labelledby="explorer-title">
+      <header class="hud-heading">
+        <div>
+          <p class="hud-species">Blue racer</p>
+          <h2 id="explorer-title">Layer explorer</h2>
+        </div>
+        <button
+          class="hud-close"
+          id="close-explorer"
+          aria-label="Close layer explorer"
+          autofocus
+        >
+          <span>Close</span><i data-icon="close"></i>
+        </button>
+      </header>
+      <div class="hud-scroll">
+        <div class="hud-columns">
+          <section class="inspector" aria-label="Anatomy controls">
+            <div class="mode-section">
+              <h3>Dissection mode</h3>
+              <div class="segmented">
+                <button id="whole" aria-pressed="true">
+                  <i data-icon="layers"></i>Whole layers</button
+                ><button id="cutaway" aria-pressed="false">
+                  <i data-icon="cut"></i>Cutaway
+                </button>
+              </div>
+              <div id="cut-options" hidden>
+                <label class="select-label"
+                  >Reveal
+                  <select id="reveal">
+                    <option value="organs">Organs</option>
+                    <option value="muscles">Muscles &amp; tendons</option>
+                    <option value="nerves">Nervous system</option>
+                    <option value="bones">Bones</option>
+                  </select></label
+                >
+                <label
+                  ><span id="section-axis">Head to tail</span> <output id="position-value">25%</output
+                  ><input
+                    id="cut-position"
+                    type="range"
+                    min="0"
+                    max="100"
+                    value="25"
+                /></label>
+                <label
+                  >Window width <output id="width-value">14%</output
+                  ><input
+                    id="cut-width"
+                    type="range"
+                    min="3"
+                    max="55"
+                    value="14" /></label
+                ><button class="focus-btn" id="frame-opening">
+                  <i data-icon="target"></i>Frame opening
+                </button>
+              </div>
+            </div>
+            <div class="systems-head">
+              <h3>Anatomical layers</h3>
+              <span id="layer-count"></span>
+            </div>
+            <div id="layer-list"></div>
+            <button id="reset" class="reset">
+              <i data-icon="reset"></i>Reset anatomy
+            </button>
+          </section>
+          <section class="study-tools" aria-label="Specimen tools">
+            <h3>View controls</h3>
+            <div class="camera-row">
+              <div
+                class="camera-tools"
+                role="group"
+                aria-label="Camera controls"
+              >
+                <button
+                  id="orbit"
+                  class="tool active"
+                  title="Orbit"
+                  aria-label="Orbit"
+                  aria-pressed="true"
+                >
+                  <i data-icon="orbit"></i>
+                </button>
+                <button
+                  id="pan"
+                  class="tool"
+                  title="Pan"
+                  aria-label="Pan"
+                  aria-pressed="false"
+                >
+                  <i data-icon="hand"></i>
+                </button>
+                <b></b
+                ><button
+                  id="zoom-out"
+                  class="tool"
+                  title="Zoom out"
+                  aria-label="Zoom out"
+                >
+                  <i data-icon="minus"></i></button
+                ><output id="zoom">100%</output
+                ><button
+                  id="zoom-in"
+                  class="tool"
+                  title="Zoom in"
+                  aria-label="Zoom in"
+                >
+                  <i data-icon="plus"></i></button
+                ><b></b
+                ><button
+                  id="fit"
+                  class="tool"
+                  title="Fit specimen"
+                  aria-label="Fit specimen"
+                >
+                  <i data-icon="fit"></i>
+                </button>
+              </div>
+              <div class="axis" aria-hidden="true">
+                <svg viewBox="0 0 56 54">
+                  <g fill="none" stroke-width="1.4">
+                    <path d="M23 33L45 36" stroke="#b47866" />
+                    <path d="M23 33L10 42" stroke="#698e7f" />
+                    <path d="M23 33V11" stroke="#8699ad" />
+                  </g>
+                  <g font-family="monospace" font-size="8">
+                    <text x="46" y="39" fill="#a26c5a">X</text>
+                    <text x="3" y="48" fill="#638876">Z</text>
+                    <text x="21" y="8" fill="#75889d">Y</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <div class="view-options">
+              <button class="label-button" id="labels" aria-pressed="false">
+                <i data-icon="tag"></i>Labels
+              </button>
+              <button class="label-button" id="game-sounds" aria-pressed="true">
+                <i data-icon="sound"></i>Game sounds
+              </button>
+              <button class="label-button" id="fullscreen" hidden>
+                <i data-icon="expand"></i><span>Full screen</span>
+              </button>
+            </div>
+            <div class="music-controls">
+              <select id="soundtrack" aria-label="Soundtrack">
+                <option value="carefree">Carefree</option>
+                <option value="cherry-blossom">Cherry Blossom</option>
+                <option value="local-forecast-slower">Local Forecast (Slower)</option>
+              </select>
+              <button class="label-button" id="music-play" aria-label="Play music">
+                Play
+              </button>
+              <p id="music-status" role="status"></p>
+            </div>
+            <p class="gestures">
+              Drag to rotate. Pinch or scroll to zoom. Pan with two fingers or a
+              right drag.
+            </p>
+            <div class="field-note">
+              <div>
+                <div class="note-title">
+                  Field note <span id="note-page">01 / 05</span>
+                </div>
+                <p id="note-text"></p>
+              </div>
+              <div class="note-nav">
+                <button id="prev-note" aria-label="Previous field note">
+                  <i data-icon="left"></i></button
+                ><button id="next-note" aria-label="Next field note">
+                  <i data-icon="right"></i>
+                </button>
+              </div>
+            </div>
+            <div class="study-links">
+              <button id="guide"><i data-icon="book"></i>Field guide</button>
+              <button id="help"><i data-icon="help"></i>Viewer help</button>
+            </div>
+            <p class="renderer">
+              <span class="status-dot"></span
+              ><span id="renderer-state">Preparing specimen</span>
+            </p>
+          </section>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="dialog">
+      <div class="dialog-top">
+        <span id="dialog-kicker"></span
+        ><button id="dialog-close" class="square" aria-label="Close dialog">
+          <i data-icon="close"></i>
+        </button>
+      </div>
+      <div id="dialog-body"></div>
+    </dialog>
+  </body>
+</html>
